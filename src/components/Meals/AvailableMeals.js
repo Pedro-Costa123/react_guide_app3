@@ -14,7 +14,7 @@ const AvailableMeals = (props) => {
 
   useEffect(() => {
     const fetchMeals = async () => {
-      const response = await fetch();
+      const response = await fetch(api);
 
       if (!response.ok) {
         throw new Error("Something went wrong!");
