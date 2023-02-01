@@ -5,9 +5,14 @@ import classes from "./Cart.module.css";
 import CartContext from "../../store/cart-context";
 import CartItem from "./CartItem";
 import Checkout from "./Checkout";
+import LoadingSpinner from "../UI/LoadingSpinner";
+
+const apiOrders = process.env.REACT_APP_FIREBASE_ORDERS;
 
 const Cart = (props) => {
   const [isCheckout, setIsCheckout] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
   const cartCtx = useContext(CartContext);
 
   const totalAmount = `$${Math.abs(cartCtx.totalAmount, 0).toFixed(2)}`;
@@ -25,6 +30,20 @@ const Cart = (props) => {
     setIsCheckout(true);
   };
 
+  const submitOrderHandler = async (userData) => {
+    setIsSubmitting(true);
+    await fetch(apiOrders, {
+      method: "POST",
+      body: JSON.stringify({
+        user: userData,
+        orderdItems: cartCtx.items,
+      }),
+    });
+    setIsSubmitting(false);
+    setDidSubmit(true);
+    cartCtx.clearCart();
+  };
+
   const cartItems = (
     <ul className={classes["cart-items"]}>
       {cartCtx.items.map((item) => (
@@ -40,15 +59,15 @@ const Cart = (props) => {
     </ul>
   );
 
-  return (
-    <Modal onClose={props.onClose}>
+  const cartModalContent = (
+    <>
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount:</span>
         <span>{totalAmount}</span>
       </div>
       {isCheckout ? (
-        <Checkout onCancel={props.onClose} />
+        <Checkout onCancel={props.onClose} onOrder={submitOrderHandler} />
       ) : (
         <div className={classes.actions}>
           <button className={classes["button--alt"]} onClick={props.onClose}>
@@ -61,6 +80,18 @@ const Cart = (props) => {
           )}
         </div>
       )}
+    </>
+  );
+
+  const isSubmittingModalContent = <LoadingSpinner />;
+
+  const didSubmitModalContent = <p>Order successful</p>;
+
+  return (
+    <Modal onClose={props.onClose}>
+      {!isSubmitting && !didSubmit && cartModalContent}
+      {isSubmitting && isSubmittingModalContent}
+      {!isSubmitting && didSubmit && didSubmitModalContent}
     </Modal>
   );
 };

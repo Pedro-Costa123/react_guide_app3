@@ -5,7 +5,7 @@ import classes from "./AvailableMeals.module.css";
 import MealItem from "./MealItem/MealItem";
 import LoadingSpinner from "../UI/LoadingSpinner";
 
-const api = process.env.REACT_APP_FIREBASE;
+const apiMeals = process.env.REACT_APP_FIREBASE_MEALS;
 
 const AvailableMeals = (props) => {
   const [meals, setMeals] = useState([]);
@@ -14,7 +14,7 @@ const AvailableMeals = (props) => {
 
   useEffect(() => {
     const fetchMeals = async () => {
-      const response = await fetch(api);
+      const response = await fetch(apiMeals);
 
       if (!response.ok) {
         throw new Error("Something went wrong!");
